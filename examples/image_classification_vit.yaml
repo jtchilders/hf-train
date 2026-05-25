@@ -10,6 +10,8 @@ data:
   image_column: img
   label_column: label
   image_size: 224
+  # CIFAR-10 doesn't have a "validation" split; reuse test for eval.
+  eval_split: test
 training:
   backend: auto
   precision: bf16
@@ -19,5 +21,5 @@ training:
   eval_strategy: epoch
   save_strategy: epoch
 output:
-  output_dir: /lus/flare/projects/myproj/runs/vit_cifar10
+  output_dir: /lus/flare/projects/datascience/parton/hf_train_runs/vit_cifar10
   run_name: vit_base_cifar10
