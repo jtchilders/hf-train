@@ -11,20 +11,36 @@ __all__ = ["TaskHandler", "HANDLERS", "get_handler"]
 HANDLERS: dict[str, type[TaskHandler]] = {}
 
 
+_HANDLER_MODULES: dict[str, tuple[str, str]] = {
+    "causal_lm": ("hf_train.tasks.causal_lm", "CausalLMHandler"),
+    "image_classification": (
+        "hf_train.tasks.image_classification",
+        "ImageClassificationHandler",
+    ),
+    "semantic_segmentation": (
+        "hf_train.tasks.semantic_segmentation",
+        "SemanticSegmentationHandler",
+    ),
+}
+
+
 def _register_handlers() -> None:
-    """Import all concrete handlers and populate HANDLERS."""
+    """Import all concrete handlers and populate HANDLERS.
+
+    Missing handler modules are skipped silently so that partial installations
+    (or in-progress task implementations) don't break unrelated tasks.
+    """
     global HANDLERS
     if HANDLERS:
         return
-    from hf_train.tasks.causal_lm import CausalLMHandler
-    from hf_train.tasks.image_classification import ImageClassificationHandler
-    from hf_train.tasks.semantic_segmentation import SemanticSegmentationHandler
+    import importlib
 
-    HANDLERS = {
-        "causal_lm": CausalLMHandler,
-        "image_classification": ImageClassificationHandler,
-        "semantic_segmentation": SemanticSegmentationHandler,
-    }
+    for name, (module_path, class_name) in _HANDLER_MODULES.items():
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError:
+            continue
+        HANDLERS[name] = getattr(module, class_name)
 
 
 def get_handler(task_name: str) -> TaskHandler:
