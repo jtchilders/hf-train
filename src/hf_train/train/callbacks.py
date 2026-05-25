@@ -42,6 +42,9 @@ class WalltimeWatchdog(TrainerCallback):
     def __init__(self, max_train_seconds: Optional[int]) -> None:
         self.max_train_seconds = max_train_seconds
         self._start_time: Optional[float] = None
+        # Set when the watchdog actually fired; used by runner to classify
+        # stopped_by correctly even if post-train save adds wall time.
+        self.fired: bool = False
 
     def on_train_begin(self, args, state, control, **kwargs):
         self._start_time = time.monotonic()
@@ -53,3 +56,4 @@ class WalltimeWatchdog(TrainerCallback):
         if elapsed >= self.max_train_seconds:
             control.should_save = True
             control.should_training_stop = True
+            self.fired = True

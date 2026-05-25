@@ -43,10 +43,16 @@ def run(config: Config) -> int:
     run_dir = prepare_run_dir(config.output.output_dir, overwrite=config.output.overwrite)
     write_config_resolved(run_dir, config.model_dump(mode="json"))
 
-    # File-based logging (separate from stdout/stderr captured by ensemble_launcher)
+    # File-based logging (separate from stdout/stderr captured by ensemble_launcher).
+    # We explicitly set both the handler level AND the root logger level so train.log
+    # captures INFO from our package regardless of how the caller configured logging.
     file_handler = logging.FileHandler(run_dir / "train.log")
     file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
-    logging.getLogger().addHandler(file_handler)
+    file_handler.setLevel(logging.INFO)
+    root_logger = logging.getLogger()
+    if root_logger.level == logging.WARNING or root_logger.level == logging.NOTSET:
+        root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(file_handler)
 
     backend: Optional[Backend] = None
     try:
@@ -231,11 +237,8 @@ def _build_training_arguments(config: Config, run_dir: Path) -> TrainingArgument
 def _classify_stopped_by(config: Config, train_output: Any, callbacks: list[Any]) -> str:
     """Determine which stopping criterion fired."""
     for cb in callbacks:
-        if isinstance(cb, WalltimeWatchdog) and cb.max_train_seconds is not None:
-            if cb._start_time is not None:
-                elapsed = time.monotonic() - cb._start_time
-                if elapsed >= cb.max_train_seconds:
-                    return "max_train_seconds"
+        if isinstance(cb, WalltimeWatchdog) and cb.fired:
+            return "max_train_seconds"
     if config.training.early_stopping is not None:
         # EarlyStopping sets should_training_stop=True when triggered.
         # If we got here cleanly under max_steps/max_epochs, we can't perfectly
