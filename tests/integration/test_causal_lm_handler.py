@@ -42,7 +42,7 @@ def test_prepare_dataset_tokenizes(handler) -> None:
     from hf_train.config.schema import DataConfig
     cfg = DataConfig(
         source="hub",
-        name="wikitext",
+        name="Salesforce/wikitext",
         config="wikitext-2-raw-v1",
         text_column="text",
         max_seq_length=64,
@@ -58,7 +58,7 @@ def test_prepare_dataset_tokenizes(handler) -> None:
 def test_collator_produces_model_acceptable_batch(handler) -> None:
     from hf_train.config.schema import DataConfig
     cfg = DataConfig(
-        source="hub", name="wikitext", config="wikitext-2-raw-v1",
+        source="hub", name="Salesforce/wikitext", config="wikitext-2-raw-v1",
         text_column="text", max_seq_length=64,
     )
     tok = handler.prepare_preprocessor("sshleifer/tiny-gpt2")

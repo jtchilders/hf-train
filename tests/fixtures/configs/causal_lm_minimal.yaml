@@ -4,7 +4,7 @@ model:
   name: sshleifer/tiny-gpt2
 data:
   source: hub
-  name: wikitext
+  name: Salesforce/wikitext
   config: wikitext-2-raw-v1
   text_column: text
 training:
