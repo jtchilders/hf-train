@@ -33,10 +33,17 @@ class XpuBackend(Backend):
 
         dtype_map = {"fp32": torch.float32, "bf16": torch.bfloat16, "fp16": torch.float16}
         torch_dtype = dtype_map.get(dtype, torch.bfloat16)
+        # weights_prepack=False is required on XPU: the prepacked Conv2d/Linear
+        # modules dispatch to torch_ipex::convolution_forward, which is CPU-only.
+        # On XPU we want the kernel-registration benefits of ipex.optimize without
+        # its CPU-targeted graph rewrites. HF Trainer + Accelerate handle device
+        # placement and bf16 autocast independently.
+        result = ipex.optimize(
+            model, optimizer=optimizer, dtype=torch_dtype, weights_prepack=False,
+        )
         # ipex.optimize returns `(model, optimizer)` when an optimizer was
         # passed in, else just `model`. HF Trainer reconstructs the optimizer
         # itself, so we usually pass optimizer=None and have to handle both.
-        result = ipex.optimize(model, optimizer=optimizer, dtype=torch_dtype)
         if isinstance(result, tuple):
             return result
         return result, optimizer
