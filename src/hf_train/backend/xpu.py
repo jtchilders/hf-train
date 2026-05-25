@@ -33,7 +33,13 @@ class XpuBackend(Backend):
 
         dtype_map = {"fp32": torch.float32, "bf16": torch.bfloat16, "fp16": torch.float16}
         torch_dtype = dtype_map.get(dtype, torch.bfloat16)
-        return ipex.optimize(model, optimizer=optimizer, dtype=torch_dtype)
+        # ipex.optimize returns `(model, optimizer)` when an optimizer was
+        # passed in, else just `model`. HF Trainer reconstructs the optimizer
+        # itself, so we usually pass optimizer=None and have to handle both.
+        result = ipex.optimize(model, optimizer=optimizer, dtype=torch_dtype)
+        if isinstance(result, tuple):
+            return result
+        return result, optimizer
 
     def capabilities(self) -> dict[str, Any]:
         return {"device": "xpu", "supported_dtypes": ["fp32", "bf16"]}
