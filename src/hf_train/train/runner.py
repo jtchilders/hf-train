@@ -195,7 +195,6 @@ def _build_training_arguments(config: Config, run_dir: Path) -> TrainingArgument
     t = config.training
     kwargs: dict[str, Any] = {
         "output_dir": str(run_dir / "checkpoints"),
-        "overwrite_output_dir": True,
         "learning_rate": t.learning_rate,
         "weight_decay": t.weight_decay,
         "warmup_ratio": t.warmup_ratio,
