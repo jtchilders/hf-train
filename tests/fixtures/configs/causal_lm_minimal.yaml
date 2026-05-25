@@ -1,0 +1,16 @@
+task: causal_lm
+model:
+  source: hub
+  name: sshleifer/tiny-gpt2
+data:
+  source: hub
+  name: wikitext
+  config: wikitext-2-raw-v1
+  text_column: text
+training:
+  max_steps: 10
+  per_device_train_batch_size: 2
+  eval_strategy: "no"
+  save_strategy: "no"
+output:
+  output_dir: /tmp/hf_train_test_causal_lm

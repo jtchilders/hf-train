@@ -1,0 +1,17 @@
+task: image_classification
+model:
+  source: hub
+  name: hf-internal-testing/tiny-random-ViTForImageClassification
+  num_labels: 10
+data:
+  source: hub
+  name: cifar10
+  image_column: img
+  label_column: label
+training:
+  max_steps: 10
+  per_device_train_batch_size: 2
+  eval_strategy: "no"
+  save_strategy: "no"
+output:
+  output_dir: /tmp/hf_train_test_image_classification

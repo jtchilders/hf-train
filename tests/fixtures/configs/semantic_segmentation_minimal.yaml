@@ -1,0 +1,17 @@
+task: semantic_segmentation
+model:
+  source: hub
+  name: hf-internal-testing/tiny-random-SegformerForSemanticSegmentation
+  num_labels: 3
+data:
+  source: hub
+  name: scene_parse_150
+  image_column: image
+  mask_column: annotation
+training:
+  max_steps: 10
+  per_device_train_batch_size: 2
+  eval_strategy: "no"
+  save_strategy: "no"
+output:
+  output_dir: /tmp/hf_train_test_semantic_segmentation
