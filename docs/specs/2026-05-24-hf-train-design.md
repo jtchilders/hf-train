@@ -136,7 +136,7 @@ data:
   name: wikitext                  # Hub dataset name
   config: wikitext-2-raw-v1       # optional Hub dataset config
   train_split: train              # default "train"
-  eval_split: validation          # default "validation"; null = no eval
+  eval_split: validation          # required when eval_strategy != "no"; null disables eval. No default — must be set explicitly per dataset (split names vary)
   text_column: text               # causal_lm only
   image_column: image             # image tasks only
   label_column: label             # image_classification only
@@ -187,6 +187,7 @@ output:
 - `data.text_column` required when `task == causal_lm`
 - `data.mask_column` required when `task == semantic_segmentation`
 - `training.eval_steps` required when `eval_strategy == "steps"`; same for save
+- `data.eval_split` required when `training.eval_strategy != "no"` (no default; user must name the dataset's eval split)
 - `model.source == "from_config"` with empty `config_overrides` → warning
 - `training.precision == "fp16"` on XPU backend → warning (poor support)
 - `training.torch_compile == true` on XPU backend → warning (unreliable with current PyTorch+IPEX)

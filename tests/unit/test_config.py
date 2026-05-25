@@ -99,6 +99,33 @@ output: {output_dir: /tmp/x}
         _load_str(bad, tmp_path)
 
 
+def test_eval_strategy_non_no_requires_eval_split(tmp_path: Path) -> None:
+    """If user asks for eval (epoch/steps), eval_split must be set explicitly.
+    Default is None so silent runtime failures on datasets without 'validation' are caught at config time."""
+    bad = """
+task: causal_lm
+model: {source: hub, name: x}
+data: {source: hub, name: y, text_column: text}
+training: {max_steps: 100, eval_strategy: epoch}
+output: {output_dir: /tmp/x}
+"""
+    with pytest.raises(ValidationError, match="eval_split"):
+        _load_str(bad, tmp_path)
+
+
+def test_eval_strategy_no_does_not_require_eval_split(tmp_path: Path) -> None:
+    """If eval is disabled, eval_split being null is fine."""
+    ok = """
+task: causal_lm
+model: {source: hub, name: x}
+data: {source: hub, name: y, text_column: text}
+training: {max_steps: 100, eval_strategy: "no", save_strategy: "no"}
+output: {output_dir: /tmp/x}
+"""
+    cfg = _load_str(ok, tmp_path)
+    assert cfg.data.eval_split is None
+
+
 def test_eval_strategy_steps_requires_eval_steps(tmp_path: Path) -> None:
     bad = """
 task: causal_lm
@@ -140,6 +167,8 @@ model: {source: hub, name: x}
 data: {source: hub, name: y, text_column: text}
 training:
   max_steps: 10
+  eval_strategy: "no"
+  save_strategy: "no"
   trainer_kwargs:
     push_to_hub: false
     report_to: ["tensorboard"]

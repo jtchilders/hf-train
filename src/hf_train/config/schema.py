@@ -25,7 +25,11 @@ class DataConfig(BaseModel):
     name: str
     config: Optional[str] = None
     train_split: str = "train"
-    eval_split: Optional[str] = "validation"
+    # Set explicitly per-dataset (e.g. "validation", "test", or null to disable
+    # eval). Defaulting to a specific split name silently fails for datasets
+    # that don't have it; making this explicit forces the user to confirm what
+    # the dataset actually exposes.
+    eval_split: Optional[str] = None
     text_column: Optional[str] = None
     image_column: Optional[str] = None
     label_column: Optional[str] = None
@@ -106,4 +110,13 @@ class Config(BaseModel):
             raise ValueError("data.label_column is required for task=image_classification")
         if self.task == "semantic_segmentation" and not self.data.mask_column:
             raise ValueError("data.mask_column is required for task=semantic_segmentation")
+        # If the user asked for eval but didn't set eval_split, that's a contradiction
+        # we'd rather catch here than at dataset-load time.
+        if self.training.eval_strategy != "no" and self.data.eval_split is None:
+            raise ValueError(
+                "data.eval_split must be set when training.eval_strategy != 'no'. "
+                "Set data.eval_split to the dataset's eval split name (e.g. "
+                "'validation' or 'test'), or set training.eval_strategy='no' to "
+                "disable eval."
+            )
         return self
