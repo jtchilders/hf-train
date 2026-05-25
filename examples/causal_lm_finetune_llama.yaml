@@ -1,0 +1,28 @@
+# Fine-tune Llama-3.2-1B on wikitext-2 on a single Aurora tile.
+task: causal_lm
+model:
+  source: hub
+  name: meta-llama/Llama-3.2-1B
+data:
+  source: hub
+  name: Salesforce/wikitext
+  config: wikitext-2-raw-v1
+  text_column: text
+  max_seq_length: 2048
+training:
+  backend: auto
+  precision: bf16
+  learning_rate: 5.0e-5
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 4
+  max_epochs: 1
+  eval_strategy: epoch
+  save_strategy: epoch
+  save_total_limit: 2
+  early_stopping:
+    patience: 2
+    metric: eval_loss
+    mode: min
+output:
+  output_dir: /lus/flare/projects/myproj/runs/llama_finetune
+  run_name: llama_3_2_1b_wikitext_finetune

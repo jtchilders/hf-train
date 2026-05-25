@@ -1,0 +1,28 @@
+# Train a small GPT-2-style model from random init.
+task: causal_lm
+model:
+  source: from_config
+  name: gpt2
+  config_overrides:
+    n_layer: 6
+    n_embd: 384
+    n_head: 6
+data:
+  source: hub
+  name: Salesforce/wikitext
+  config: wikitext-2-raw-v1
+  text_column: text
+  max_seq_length: 512
+training:
+  backend: auto
+  precision: bf16
+  learning_rate: 3.0e-4
+  per_device_train_batch_size: 8
+  max_steps: 5000
+  eval_strategy: steps
+  eval_steps: 500
+  save_strategy: steps
+  save_steps: 500
+output:
+  output_dir: /lus/flare/projects/myproj/runs/gpt2_small_scratch
+  run_name: gpt2_6layer_scratch

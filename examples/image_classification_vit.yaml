@@ -1,0 +1,23 @@
+# Fine-tune ViT-base on CIFAR-10.
+task: image_classification
+model:
+  source: hub
+  name: google/vit-base-patch16-224
+  num_labels: 10
+data:
+  source: hub
+  name: uoft-cs/cifar10
+  image_column: img
+  label_column: label
+  image_size: 224
+training:
+  backend: auto
+  precision: bf16
+  learning_rate: 3.0e-5
+  per_device_train_batch_size: 32
+  max_epochs: 3
+  eval_strategy: epoch
+  save_strategy: epoch
+output:
+  output_dir: /lus/flare/projects/myproj/runs/vit_cifar10
+  run_name: vit_base_cifar10
