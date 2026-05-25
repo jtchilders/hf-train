@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hf-train"
+version = "0.1.0"
+description = "HuggingFace training tool for one experiment per invocation, designed for Aurora"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Taylor Childers"}]
+dependencies = [
+    "transformers>=4.40",
+    "datasets>=2.18",
+    "accelerate>=0.27",
+    "torch>=2.1",
+    "pydantic>=2.5",
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "evaluate>=0.4",
+    "numpy>=1.24",
+    "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+hf-train = "hf_train.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "network: tests that require Hub access (deselect with -m 'not network')",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
